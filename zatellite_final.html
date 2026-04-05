@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zatellite Logistics</title>
+<style>
+:root {
+  --bg: #f0f2f5; --card: #fff; --border: #e8e8e8; --text: #333; --sub: #888; --input-bg: #fafafa;
+  --primary: #1a237e; --primary-light: #e8eaf6; --green: #2e7d32; --red: #c62828; --orange: #e65100; --blue: #1565c0;
+  --warning-bg: #fff3e0; --warning-border: #ffe0b2; --info-bg: #e3f2fd; --info-border: #90caf9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: sans-serif; background: var(--bg); padding: 16px 16px 90px; max-width: 480px; margin: 0 auto; color: var(--text); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; z-index: 200; max-width: 480px; margin: 0 auto; }
+.bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px 14px; cursor: pointer; color: var(--sub); font-size: 10px; font-weight: 600; gap: 3px; border: none; background: none; position: relative; }
+.bottom-nav-item.active { color: var(--primary); }
+.bottom-nav-item .nav-icon { font-size: 20px; line-height: 1; }
+.more-menu { position: fixed; bottom: 65px; right: 0; left: 0; max-width: 480px; margin: 0 auto; background: var(--card); border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; z-index: 199; display: none; padding: 12px 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); }
+.more-menu.open { display: block; }
+.more-menu-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--text); border: none; background: none; width: 100%; }
+.more-menu-item .menu-icon { font-size: 20px; width: 28px; text-align: center; }
+.more-menu-item.active { color: var(--primary); }
+.more-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 198; display: none; }
+.more-overlay.open { display: block; }
+.card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 4px; margin-top: 10px; }
+input, select, textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 15px; background: var(--input-bg); color: var(--text); }
+input:focus, select:focus { outline: none; border-color: var(--primary); }
+textarea { height: 65px; resize: none; }
+button { width: 100%; padding: 13px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); margin-top: 8px; }
+.btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; width: auto; margin-top: 0; background: var(--primary); color: white; }
+.btn-sm-outline { padding: 8px 14px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border); font-weight: 600; cursor: pointer; width: auto; margin-top: 0; background: var(--card); color: var(--text); }
+.btn-edit { padding: 5px 10px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); font-weight: 600; cursor: pointer; width: auto; margin: 0; background: var(--card); color: var(--sub); }
+.theme-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.theme-swatch { width:100%; height:42px; border:none; border-radius:10px; padding:0; background:none; cursor:pointer; margin:0; }
+.theme-chip-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.theme-chip { padding:8px 10px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:12px; font-weight:600; cursor:pointer; width:auto; margin-top:0; }
+.theme-chip.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.summary-box { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid var(--border); text-align: center; }
+.summary-label { font-size: 11px; color: var(--sub); margin-bottom: 4px; }
+.summary-value { font-size: 20px; font-weight: 700; }
+.green { color: var(--green); } .red { color: var(--red); } .orange { color: var(--orange); } .blue { color: var(--blue); }
+.entry { background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 8px; border-left: 4px solid #ccc; }
+.entry.income-route { border-left-color: var(--green); }
+.entry.income-stat { border-left-color: var(--orange); }
+.entry.expense { border-left-color: var(--red); }
+.entry.payment { border-left-color: var(--blue); }
+.entry-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.entry-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.entry-amount { font-size: 15px; font-weight: 700; }
+.entry-detail { font-size: 12px; color: var(--sub); margin-top: 4px; line-height: 1.5; }
+.stat-badge { display: inline-block; background: var(--warning-bg); color: var(--orange); font-size: 10px; padding: 2px 7px; border-radius: 99px; margin-top: 4px; font-weight: 700; }
+.unpaid-badge-inline { display: inline-block; background: var(--warning-bg); color: var(--orange); font-size: 10px; padding: 2px 7px; border-radius: 99px; margin-top: 4px; font-weight: 700; }
+.section { display: none; }
+.section.active { display: block; }
+.delete-btn { background: none; border: none; color: #ccc; font-size: 20px; cursor: pointer; padding: 0; width: auto; margin: 0; line-height: 1; }
+.delete-btn:hover { color: var(--red); }
+.net-box { background: var(--primary); border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 12px; color: white; }
+.net-label { font-size: 12px; opacity: 0.75; margin-bottom: 4px; }
+.net-value { font-size: 30px; font-weight: 700; }
+.period-row { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+.period-btn { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); font-size: 11px; font-weight: 600; cursor: pointer; color: var(--sub); white-space: nowrap; }
+.period-btn.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.insight-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.insight-row:last-child { border-bottom: none; }
+.insight-label { color: var(--sub); }
+.insight-value { font-weight: 600; color: var(--text); }
+.empty-state { text-align: center; color: #bbb; font-size: 14px; padding: 40px 0; }
+.header-logo { text-align: center; padding: 16px 0 12px; }
+.header-logo .name { font-size: 20px; font-weight: 700; color: var(--primary); }
+.header-logo .sub-title { font-size: 12px; color: var(--sub); margin-top: 2px; }
+.custom-range { background: var(--primary-light); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); display: none; }
+.custom-range.visible { display: block; }
+.date-row { display: flex; gap: 8px; }
+.date-row input { flex: 1; font-size: 13px; }
+.month-card { background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+.month-name { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+.month-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+.section-title { font-size: 12px; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.goal-bar-bg { background: var(--border); border-radius: 99px; height: 10px; margin: 8px 0; overflow: hidden; }
+.goal-bar { height: 10px; border-radius: 99px; transition: width 0.4s; }
+.goal-red { background: var(--red); } .goal-yellow { background: #f9a825; } .goal-green { background: var(--green); }
+.quarter-box { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.quarter-title { font-size: 13px; font-weight: 700; color: var(--orange); margin-bottom: 2px; }
+.quarter-due { font-size: 11px; color: #888; margin-bottom: 8px; }
+.record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.record-box { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid var(--border); text-align: center; }
+.record-label { font-size: 11px; color: var(--sub); margin-bottom: 4px; }
+.record-value { font-size: 18px; font-weight: 700; color: var(--primary); }
+.record-sub { font-size: 10px; color: var(--sub); margin-top: 2px; }
+.streak-box { background: var(--primary); border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 12px; color: white; }
+.streak-num { font-size: 36px; font-weight: 700; }
+.streak-label { font-size: 12px; opacity: 0.8; }
+.modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 300; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--card); border-radius: 16px; padding: 20px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
+.modal h3 { font-size: 16px; margin-bottom: 12px; color: var(--text); }
+.optimized-stop { background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; }
+.opt-num { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.opt-address { font-size: 13px; color: var(--text); line-height: 1.4; }
+.map-btn { display: inline-block; margin-top: 6px; padding: 5px 10px; background: var(--primary-light); color: var(--primary); border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; border: 1px solid var(--primary); cursor: pointer; }
+.route-summary { background: var(--primary-light); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.route-summary-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+.loading-spinner { text-align: center; padding: 20px; color: var(--sub); font-size: 14px; }
+.contact-btn { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: var(--card); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; text-decoration: none; }
+.contact-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.contact-role { font-size: 12px; color: var(--sub); margin-top: 2px; }
+.call-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.saved-route-card { background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+.saved-route-name { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+.saved-route-detail { font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+.saved-route-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.payment-owed { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+.facility-note { background: var(--primary-light); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.facility-note-name { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+.facility-note-text { font-size: 12px; color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="header-logo">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div style="width:42px;display:flex;justify-content:flex-start;">
+      <img id="brand-logo" alt="Logo" style="display:none;width:40px;height:40px;object-fit:cover;border-radius:10px;border:1px solid var(--border);">
+    </div>
+    <div style="flex:1;text-align:center;">
+      <div class="name" id="brand-name">Zatellite Logistics</div>
+      <div class="sub-title" id="brand-subtitle">Income, Expense & Route Tracker</div>
+    </div>
+    <button onclick="toggleDarkMode()" id="dark-btn" style="background:var(--primary-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:16px;cursor:pointer;width:auto;margin:0;color:var(--text);">🌙</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
+  <div class="period-row">
+    <div class="period-btn active" onclick="setPeriod('today',this)">Today</div>
+    <div class="period-btn" onclick="setPeriod('week',this)">This week</div>
+    <div class="period-btn" onclick="setPeriod('month',this)">This month</div>
+    <div class="period-btn" onclick="setPeriod('custom',this)">Custom</div>
+    <div class="period-btn" onclick="setPeriod('all',this)">All time</div>
+  </div>
+  <div class="custom-range" id="custom-range">
+    <div class="date-row"><input type="date" id="custom-from"><input type="date" id="custom-to"></div>
+    <button class="btn-sm" style="margin-top:8px;" onclick="applyCustomRange()">Apply</button>
+  </div>
+  <div class="net-box">
+    <div class="net-label" id="dash-period-label">This week — net after tax reserve</div>
+    <div class="net-value" id="net-value">$0.00</div>
+  </div>
+  <div class="card">
+    <div class="section-title">Quick log</div>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:10px;">Tap to instantly log a saved route</div>
+    <div id="quick-log-list"><div style="color:var(--sub);font-size:13px;">No saved routes yet. Save a route in the Route tab.</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Monthly revenue goal</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <input type="number" id="goal-input" placeholder="Set monthly goal e.g. 3000" style="flex:1;font-size:14px;padding:6px 10px;" inputmode="numeric">
+      <button class="btn-sm" onclick="saveGoal('month')">Set</button>
+    </div>
+    <div id="monthly-goal-display" style="display:none;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span id="monthly-goal-label" style="color:var(--sub);"></span>
+        <span id="monthly-goal-pct" style="font-weight:700;"></span>
+      </div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="monthly-goal-bar"></div></div>
+      <div style="font-size:12px;color:var(--sub);margin-top:4px;" id="monthly-goal-remaining"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Weekly revenue goal</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <input type="number" id="weekly-goal-input" placeholder="Set weekly goal e.g. 700" style="flex:1;font-size:14px;padding:6px 10px;" inputmode="numeric">
+      <button class="btn-sm" onclick="saveGoal('week')">Set</button>
+    </div>
+    <div id="weekly-goal-display" style="display:none;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span id="weekly-goal-label" style="color:var(--sub);"></span>
+        <span id="weekly-goal-pct" style="font-weight:700;"></span>
+      </div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="weekly-goal-bar"></div></div>
+      <div style="font-size:12px;color:var(--sub);margin-top:4px;" id="weekly-goal-remaining"></div>
+    </div>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-box"><div class="summary-label">Income</div><div class="summary-value green" id="total-income">$0</div></div>
+    <div class="summary-box"><div class="summary-label">Expenses</div><div class="summary-value red" id="total-expenses">$0</div></div>
+    <div class="summary-box"><div class="summary-label">Tax reserve</div><div class="summary-value red" id="tax-reserve">$0</div></div>
+    <div class="summary-box"><div class="summary-label">Stat pay</div><div class="summary-value orange" id="stat-total">$0</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Breakdown</div>
+    <div class="insight-row"><span class="insight-label">Regular routes</span><span class="insight-value green" id="regular-total">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Stat routes</span><span class="insight-value orange" id="stat-total-2">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Miles driven</span><span class="insight-value blue" id="total-miles">0 mi</span></div>
+    <div class="insight-row"><span class="insight-label" id="mileage-rate-label">Mileage deduction (67¢/mi)</span><span class="insight-value green" id="mileage-deduction">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Routes completed</span><span class="insight-value" id="route-count">0</span></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Fuel cost calculator</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div><label style="margin-top:0;">Miles</label><input type="number" id="fuel-miles" placeholder="e.g. 62" inputmode="numeric" oninput="calcFuel()"></div>
+      <div><label style="margin-top:0;">Gas price ($/gal)</label><input type="number" id="fuel-price" placeholder="e.g. 3.20" step="0.01" inputmode="decimal" oninput="calcFuel()"></div>
+      <div><label style="margin-top:0;">Car MPG</label><input type="number" id="fuel-mpg" placeholder="e.g. 32" inputmode="numeric" oninput="calcFuel()"></div>
+      <div><label style="margin-top:0;">Route pay ($)</label><input type="number" id="fuel-pay" placeholder="e.g. 66" step="0.01" inputmode="decimal" oninput="calcFuel()"></div>
+    </div>
+    <div id="fuel-result" style="display:none;background:var(--primary-light);border-radius:8px;padding:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:var(--sub);">Gallons used</span><span id="fuel-gallons" style="font-weight:600;"></span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:var(--sub);">Gas cost</span><span id="fuel-cost" style="font-weight:600;color:var(--red);"></span></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0 3px;border-top:1px solid var(--border);margin-top:4px;"><span style="color:var(--sub);font-weight:600;">Net pay after gas</span><span id="fuel-net" style="font-weight:700;font-size:16px;"></span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;"><span style="color:var(--sub);">Effective hourly (est.)</span><span id="fuel-hourly" style="font-weight:600;color:var(--blue);"></span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Payments owed</div>
+    <div id="payments-owed-list"><div style="color:var(--sub);font-size:13px;">No outstanding payments.</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Settlement center</div>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:10px;">Earned unpaid vs payments received</div>
+    <div id="settlement-center"><div style="color:var(--sub);font-size:13px;">No payment data yet.</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Route profitability</div>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:10px;">Top routes by net pay after mileage cost</div>
+    <div id="route-profitability-list"><div style="color:var(--sub);font-size:13px;">No routes logged yet.</div></div>
+  </div>
+</div>
+
+<!-- ADD -->
+<div id="add" class="section">
+  <div class="card">
+    <label>Entry type</label>
+    <select id="entry-type" onchange="toggleFields()">
+      <optgroup label="Income">
+        <option value="income-route">Regular route</option>
+        <option value="income-stat">Stat route</option>
+      </optgroup>
+      <optgroup label="Expenses">
+        <option value="expense-gas">Gas</option>
+        <option value="expense-supplies">Supplies</option>
+        <option value="expense-car">Car maintenance</option>
+        <option value="expense-insurance">Car insurance</option>
+        <option value="expense-phone">Phone bill</option>
+        <option value="expense-uniform">Uniform / clothing</option>
+        <option value="expense-other">Other expense</option>
+      </optgroup>
+      <optgroup label="Payments">
+        <option value="payment-received">Payment received</option>
+      </optgroup>
+    </select>
+    <label>Date</label><input type="date" id="entry-date">
+    <label>Amount ($)</label><input type="number" id="entry-amount" placeholder="0.00" step="0.01" inputmode="decimal">
+    <div id="route-fields">
+      <label>Route name</label><input type="text" id="entry-route" placeholder="e.g. Noble nightly">
+      <label>Pickup location</label><input type="text" id="entry-pickup" placeholder="e.g. 4425 SW 21st St, Oklahoma City OK">
+      <label>Stops / delivery locations</label>
+      <textarea id="entry-stops" placeholder="One stop per line e.g.&#10;315 SW 80th St OKC&#10;963 SW 107th St OKC&#10;Norman stops..." style="height:80px;"></textarea>
+      <label>Miles driven</label><input type="number" id="entry-miles" placeholder="0" inputmode="numeric">
+      <label>Start time</label><input type="time" id="entry-start">
+      <label>End time</label><input type="time" id="entry-end">
+      <label>Payment status</label>
+      <select id="payment-status">
+        <option value="unpaid">Unpaid — awaiting settlement</option>
+        <option value="paid">Paid — received</option>
+      </select>
+    </div>
+    <div id="stat-fields" style="display:none;">
+      <label>Pickup location</label><input type="text" id="stat-pickup" placeholder="e.g. Boomer OKC Pharmacy">
+      <label>Delivery stops</label>
+      <textarea id="stat-delivery" placeholder="One stop per line e.g.&#10;Wilkins Health, Duncan OK&#10;Gregston Nursing, Marlow OK" style="height:70px;"></textarea>
+      <label>Miles</label><input type="number" id="stat-miles" placeholder="0" inputmode="numeric">
+      <label>Start time</label><input type="time" id="stat-start">
+      <label>End time</label><input type="time" id="stat-end">
+      <label>Payment status</label>
+      <select id="stat-payment-status">
+        <option value="unpaid">Unpaid — awaiting settlement</option>
+        <option value="paid">Paid — received</option>
+      </select>
+    </div>
+    <div id="payment-fields" style="display:none;">
+      <label>Settlement period / note</label><input type="text" id="payment-note" placeholder="e.g. Semi-monthly Mar 1-15">
+    </div>
+    <label>Notes</label><textarea id="entry-notes" placeholder="Any extra details..."></textarea>
+    <button class="btn-primary" onclick="addEntry()">Save entry</button>
+  </div>
+</div>
+
+<!-- ROUTE -->
+<div id="route" class="section">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;">Saved routes</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-sm-outline" onclick="document.getElementById('routes-import').click()">Import</button>
+        <button class="btn-sm" onclick="exportRoutesOnly()">Export</button>
+      </div>
+    </div>
+    <input type="file" id="routes-import" accept="application/json" style="display:none;" onchange="importRoutesOnly(event)">
+    <div id="saved-routes-list"><div style="color:var(--sub);font-size:13px;">No saved routes yet.</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Build & optimize route</div>
+    <label>Route name</label><input type="text" id="route-name" placeholder="e.g. Noble nightly">
+    <label>Starting point</label><input type="text" id="origin" placeholder="e.g. 4425 SW 21st St, Oklahoma City OK">
+    <label>Return point</label><input type="text" id="destination" placeholder="Same as origin or different">
+    <div style="margin-top:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span class="section-title" style="margin:0;">Saved addresses</span>
+        <button class="btn-sm" onclick="showSaveAddressModal()">+ Save new</button>
+      </div>
+      <div id="saved-addr-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+    </div>
+    <div style="margin-top:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="section-title" style="margin:0;">Stops</span>
+        <button class="btn-sm" onclick="addStop()">+ Add stop</button>
+      </div>
+      <div id="stops-container"></div>
+    </div>
+    <button class="btn-primary" onclick="optimizeRoute()" id="optimize-btn">Optimize route</button>
+    <button class="btn-outline" onclick="saveCurrentRoute()">Save this route</button>
+    <button class="btn-sm-outline" style="margin-top:8px;width:100%;padding:10px;" onclick="clearRoute()">Clear all</button>
+  </div>
+  <div id="route-loading" class="loading-spinner" style="display:none;">Calculating best route...</div>
+  <div id="route-results" style="display:none;">
+    <div class="route-summary" id="route-summary-box"></div>
+    <div class="section-title" style="margin-bottom:8px;">Optimized stop order</div>
+    <div id="optimized-stops"></div>
+    <button class="btn-primary" style="margin-top:4px;" onclick="openInMaps()">Open full route in Google Maps</button>
+    <button class="btn-outline" onclick="logThisRoute()">Log this route as income</button>
+  </div>
+</div>
+
+<!-- LOG -->
+<div id="log" class="section">
+  <div class="period-row">
+    <div class="period-btn active" onclick="setLogPeriod('all',this)">All</div>
+    <div class="period-btn" onclick="setLogPeriod('today',this)">Today</div>
+    <div class="period-btn" onclick="setLogPeriod('week',this)">This week</div>
+    <div class="period-btn" onclick="setLogPeriod('month',this)">This month</div>
+    <div class="period-btn" onclick="setLogPeriod('custom',this)">Custom</div>
+  </div>
+  <div class="custom-range" id="log-custom-range">
+    <div class="date-row"><input type="date" id="log-custom-from"><input type="date" id="log-custom-to"></div>
+    <button class="btn-sm" style="margin-top:8px;" onclick="applyLogCustomRange()">Apply</button>
+  </div>
+  <select id="filter-type" onchange="renderLog()" style="margin-bottom:10px;">
+    <option value="all">All types</option>
+    <option value="income">Income only</option>
+    <option value="expense">Expenses only</option>
+    <option value="stat">Stat routes only</option>
+    <option value="unpaid">Unpaid routes</option>
+  </select>
+  <div id="log-list"></div>
+  <div id="log-empty" class="empty-state">No entries found</div>
+  <button class="btn-outline" onclick="exportCSV()">Export to CSV</button>
+</div>
+
+<!-- MONTHLY -->
+<div id="months" class="section">
+  <div id="monthly-list"></div>
+  <div id="monthly-empty" class="empty-state">No entries yet</div>
+</div>
+
+<!-- INSIGHTS -->
+<div id="insights" class="section">
+  <div class="streak-box"><div class="streak-num" id="streak-num">0</div><div class="streak-label">day route streak</div></div>
+  <div class="record-grid">
+    <div class="record-box"><div class="record-label">Best week</div><div class="record-value" id="best-week">$0</div><div class="record-sub" id="best-week-label"></div></div>
+    <div class="record-box"><div class="record-label">Best month</div><div class="record-value" id="best-month">$0</div><div class="record-sub" id="best-month-label"></div></div>
+    <div class="record-box"><div class="record-label">Most routes</div><div class="record-value" id="most-routes">0</div><div class="record-sub">in a week</div></div>
+    <div class="record-box"><div class="record-label">Best stat pay</div><div class="record-value orange" id="best-stat">$0</div><div class="record-sub">single run</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">All time summary</div>
+    <div class="insight-row"><span class="insight-label">Gross income</span><span class="insight-value green" id="ins-gross">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Total expenses</span><span class="insight-value red" id="ins-expenses">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Mileage deduction</span><span class="insight-value green" id="ins-mileage">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Estimated taxable</span><span class="insight-value" id="ins-taxable">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Estimated tax owed</span><span class="insight-value red" id="ins-tax">$0</span></div>
+    <div class="insight-row"><span class="insight-label">True take home</span><span class="insight-value green" id="ins-takehome">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Total routes</span><span class="insight-value" id="ins-routes">0</span></div>
+    <div class="insight-row"><span class="insight-label">Total stat routes</span><span class="insight-value orange" id="ins-stats">0</span></div>
+    <div class="insight-row"><span class="insight-label">Avg pay per route</span><span class="insight-value" id="ins-avg">$0</span></div>
+    <div class="insight-row"><span class="insight-label">Total miles driven</span><span class="insight-value blue" id="ins-miles">0</span></div>
+  </div>
+</div>
+
+<!-- TAXES -->
+<div id="taxes" class="section">
+  <div class="card">
+    <div class="section-title">2026 quarterly deadlines</div>
+    <div class="quarter-box"><div class="quarter-title">Q1 — Jan 1 to Mar 31</div><div class="quarter-due">Due: April 15, 2026</div>
+      <div class="insight-row"><span class="insight-label">Income</span><span class="insight-value green" id="q1-income">$0</span></div>
+      <div class="insight-row"><span class="insight-label">Estimated tax</span><span class="insight-value red" id="q1-tax">$0</span></div></div>
+    <div class="quarter-box"><div class="quarter-title">Q2 — Apr 1 to May 31</div><div class="quarter-due">Due: June 16, 2026</div>
+      <div class="insight-row"><span class="insight-label">Income</span><span class="insight-value green" id="q2-income">$0</span></div>
+      <div class="insight-row"><span class="insight-label">Estimated tax</span><span class="insight-value red" id="q2-tax">$0</span></div></div>
+    <div class="quarter-box"><div class="quarter-title">Q3 — Jun 1 to Aug 31</div><div class="quarter-due">Due: September 15, 2026</div>
+      <div class="insight-row"><span class="insight-label">Income</span><span class="insight-value green" id="q3-income">$0</span></div>
+      <div class="insight-row"><span class="insight-label">Estimated tax</span><span class="insight-value red" id="q3-tax">$0</span></div></div>
+    <div class="quarter-box"><div class="quarter-title">Q4 — Sep 1 to Dec 31</div><div class="quarter-due">Due: January 15, 2027</div>
+      <div class="insight-row"><span class="insight-label">Income</span><span class="insight-value green" id="q4-income">$0</span></div>
+      <div class="insight-row"><span class="insight-label">Estimated tax</span><span class="insight-value red" id="q4-tax">$0</span></div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Tax & mileage settings</div>
+    <label>Tax rate (%)</label>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <input type="number" id="setting-tax-rate" placeholder="28" style="flex:1;font-size:14px;padding:6px 10px;" inputmode="numeric">
+      <span style="font-size:14px;color:var(--sub);">%</span>
+      <button class="btn-sm" onclick="saveBusinessSettings()">Save</button>
+    </div>
+    <label style="margin-top:10px;">Mileage rate ($ per mile)</label>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <input type="number" id="setting-mileage-rate" placeholder="0.67" step="0.01" style="flex:1;font-size:14px;padding:6px 10px;" inputmode="decimal">
+      <span style="font-size:14px;color:var(--sub);">/mi</span>
+    </div>
+    <div style="font-size:12px;color:var(--sub);margin-top:6px;">IRS 2025 rate is $0.70/mile. Consult a tax professional for your actual rate.</div>
+  </div>
+</div>
+
+<!-- CONTACTS -->
+<div id="contacts" class="section">
+  <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">Tap to call directly</div>
+  <div id="contacts-list"></div>
+</div>
+
+<!-- NOTES -->
+<div id="notes" class="section">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;">Facility notes</div>
+      <button class="btn-sm" onclick="showFacilityNoteModal()">+ Add</button>
+    </div>
+    <div id="facility-notes-list"><div style="color:var(--sub);font-size:13px;">No facility notes yet.</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Business notes</div>
+    <textarea id="business-notes" placeholder="Ideas, goals, plans..." style="height:120px;" oninput="saveBusinessNotes()"></textarea>
+  </div>
+  <div class="card">
+    <div class="section-title">General notes</div>
+    <textarea id="general-notes" placeholder="Anything else..." style="height:100px;" oninput="saveGeneralNotes()"></textarea>
+  </div>
+  <div class="card">
+    <div class="section-title">Brand settings</div>
+    <label>App name</label><input type="text" id="setting-app-name" placeholder="Zatellite Logistics">
+    <label>Subtitle</label><input type="text" id="setting-app-subtitle" placeholder="Income, Expense & Route Tracker">
+    <label>Logo</label><input type="file" id="setting-logo" accept="image/*" onchange="handleLogoUpload(event)">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      <button class="btn-sm" onclick="saveBrandSettings()">Save brand</button>
+      <button class="btn-sm-outline" onclick="clearLogo()">Remove logo</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">App settings</div>
+    <label>Optional PIN lock</label>
+    <input type="password" inputmode="numeric" maxlength="6" id="setting-pin" placeholder="Leave blank to disable">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      <button class="btn-sm" onclick="savePin()">Save PIN</button>
+      <button class="btn-sm-outline" onclick="clearPin()">Remove PIN</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;">Contacts manager</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <input type="text" id="contact-name-input" placeholder="Name">
+      <input type="text" id="contact-role-input" placeholder="Role">
+      <input type="tel" id="contact-phone-input" placeholder="Phone number">
+      <input type="text" id="contact-label-input" placeholder="Optional note">
+    </div>
+    <button class="btn-sm" onclick="addContact()">+ Add contact</button>
+    <div id="contact-editor-list" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Theme colors</div>
+    <div class="theme-chip-row">
+      <button class="theme-chip" id="theme-preset-navy" onclick="applyThemePreset('navy')">Navy</button>
+      <button class="theme-chip" id="theme-preset-emerald" onclick="applyThemePreset('emerald')">Emerald</button>
+      <button class="theme-chip" id="theme-preset-plum" onclick="applyThemePreset('plum')">Plum</button>
+      <button class="theme-chip" id="theme-preset-sunset" onclick="applyThemePreset('sunset')">Sunset</button>
+      <button class="theme-chip" onclick="resetThemeColors()">Reset</button>
+    </div>
+    <div class="theme-grid">
+      <div><label style="margin-top:0;">Primary</label><input class="theme-swatch" type="color" id="theme-primary" oninput="saveCustomTheme()"></div>
+      <div><label style="margin-top:0;">Soft accent</label><input class="theme-swatch" type="color" id="theme-primary-light" oninput="saveCustomTheme()"></div>
+      <div><label>Success</label><input class="theme-swatch" type="color" id="theme-green" oninput="saveCustomTheme()"></div>
+      <div><label>Warning</label><input class="theme-swatch" type="color" id="theme-orange" oninput="saveCustomTheme()"></div>
+      <div><label>Danger</label><input class="theme-swatch" type="color" id="theme-red" oninput="saveCustomTheme()"></div>
+      <div><label>Info</label><input class="theme-swatch" type="color" id="theme-blue" oninput="saveCustomTheme()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Backup & restore</div>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:10px;">Export your data so you never lose it. Import back anytime.</div>
+    <button class="btn-primary" onclick="exportBackup()">Export full backup</button>
+    <button class="btn-outline" onclick="document.getElementById('backup-file').click()">Import backup</button>
+    <input type="file" id="backup-file" accept=".json,application/json" style="display:none;" onchange="importBackup(event)">
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal"><h3>Edit entry</h3>
+    <label>Amount ($)</label><input type="number" id="edit-amount" step="0.01" inputmode="decimal">
+    <label>Date</label><input type="date" id="edit-date">
+    <label>Notes</label><textarea id="edit-notes"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-primary" style="flex:1;margin:0;" onclick="saveEdit()">Save</button>
+      <button class="btn-outline" style="flex:1;margin:0;" onclick="closeModal('edit-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="addr-modal">
+  <div class="modal"><h3>Save address</h3>
+    <label>Label</label><input type="text" id="addr-label" placeholder="e.g. Pharmerica OKC">
+    <label>Full address</label><input type="text" id="addr-value" placeholder="e.g. 4425 SW 21st St, Oklahoma City OK">
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-primary" style="flex:1;margin:0;" onclick="saveAddress()">Save</button>
+      <button class="btn-outline" style="flex:1;margin:0;" onclick="closeModal('addr-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="facility-modal">
+  <div class="modal"><h3>Facility note</h3>
+    <label>Facility name</label><input type="text" id="facility-name" placeholder="e.g. Meadowlake Retirement">
+    <label>Note</label><textarea id="facility-note-text" placeholder="e.g. Side entrance only, call ahead..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-primary" style="flex:1;margin:0;" onclick="saveFacilityNote()">Save</button>
+      <button class="btn-outline" style="flex:1;margin:0;" onclick="closeModal('facility-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="pin-modal">
+  <div class="modal"><h3>Unlock app</h3>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:10px;">Enter your PIN to continue.</div>
+    <input type="password" inputmode="numeric" maxlength="6" id="pin-entry" placeholder="PIN">
+    <button class="btn-primary" onclick="unlockApp()">Unlock</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="bottom-nav-item active" id="nav-dashboard" onclick="showTab('dashboard',this)"><span class="nav-icon">📊</span><span style="font-size:10px;font-weight:600;">Dashboard</span></button>
+  <button class="bottom-nav-item" id="nav-add" onclick="showTab('add',this)"><span class="nav-icon">➕</span><span style="font-size:10px;font-weight:600;">Add</span></button>
+  <button class="bottom-nav-item" id="nav-route" onclick="showTab('route',this)"><span class="nav-icon">🗺️</span><span style="font-size:10px;font-weight:600;">Route</span></button>
+  <button class="bottom-nav-item" id="nav-log" onclick="showTab('log',this)"><span class="nav-icon">📋</span><span style="font-size:10px;font-weight:600;">Log</span></button>
+  <button class="bottom-nav-item" id="nav-more" onclick="toggleMoreMenu()"><span class="nav-icon">☰</span><span style="font-size:10px;font-weight:600;">More</span></button>
+</div>
+<div class="more-overlay" id="more-overlay" onclick="closeMoreMenu()"></div>
+<div class="more-menu" id="more-menu">
+  <button class="more-menu-item" id="nav-months" onclick="showTab('months',this);closeMoreMenu()"><span class="menu-icon">📅</span>Monthly</button>
+  <button class="more-menu-item" id="nav-insights" onclick="showTab('insights',this);closeMoreMenu()"><span class="menu-icon">📈</span>Insights</button>
+  <button class="more-menu-item" id="nav-taxes" onclick="showTab('taxes',this);closeMoreMenu()"><span class="menu-icon">💰</span>Taxes</button>
+  <button class="more-menu-item" id="nav-contacts" onclick="showTab('contacts',this);closeMoreMenu()"><span class="menu-icon">📞</span>Contacts</button>
+  <button class="more-menu-item" id="nav-notes" onclick="showTab('notes',this);closeMoreMenu()"><span class="menu-icon">📝</span>Notes & Settings</button>
+</div>
+
+<script>function initMap(){window.googleMapsReady=true;}</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZPoVWUvy8kkT8zeUtSXmeh564GzBQGH0&libraries=geometry&callback=initMap" async defer></script>
+<script>
+const STORAGE_KEY = 'zatellite_v5';
+let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+let monthlyGoal = parseFloat(localStorage.getItem('zat_goal_month')||'0');
+let weeklyGoal = parseFloat(localStorage.getItem('zat_goal_week')||'0');
+let taxRate = parseFloat(localStorage.getItem('zatellite_taxrate')||'0.28');
+let mileageRate = parseFloat(localStorage.getItem('zat_mileage_rate')||'0.67');
+let savedRoutes = JSON.parse(localStorage.getItem('zat_saved_routes')||'[]');
+let savedAddresses = JSON.parse(localStorage.getItem('zat_saved_addresses')||'[]');
+let facilityNotes = JSON.parse(localStorage.getItem('zat_facility_notes')||'[]');
+let appContacts = JSON.parse(localStorage.getItem('zat_contacts')||JSON.stringify([
+  {name:'Amiee',role:'Diligent — Route Scheduler',phone:'4054763322',label:''},
+  {name:'Marcus',role:'Diligent — Night Shift Lead',phone:'4053180930',label:''},
+  {name:'Kendi',role:'Wife',phone:'4058213097',label:''}
+]));
+let brandSettings = JSON.parse(localStorage.getItem('zat_brand_settings')||'{"name":"Zatellite Logistics","subtitle":"Income, Expense & Route Tracker","logo":""}');
+let currentPeriod='week', customFrom=null, customTo=null;
+let logPeriod='all', logCustomFrom=null, logCustomTo=null;
+let editingId=null, stopCount=0, optimizedOrder=[], currentOrigin='', currentDest='';
+let darkMode = localStorage.getItem('zat_dark')==='true';
+
+const typeLabels = {'income-route':'Regular route','income-stat':'Stat route','expense-gas':'Gas','expense-supplies':'Supplies','expense-car':'Car maintenance','expense-insurance':'Car insurance','expense-phone':'Phone','expense-uniform':'Uniform','expense-other':'Other expense','payment-received':'Payment received'};
+
+// NAV
+function toggleMoreMenu(){document.getElementById('more-menu').classList.toggle('open');document.getElementById('more-overlay').classList.toggle('open');}
+function closeMoreMenu(){document.getElementById('more-menu').classList.remove('open');document.getElementById('more-overlay').classList.remove('open');}
+function showTab(tab,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item,.more-menu-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  const navEl=document.getElementById('nav-'+tab);
+  if(navEl)navEl.classList.add('active');
+  if(el&&el!==navEl)el.classList.add('active');
+  if(tab==='dashboard')updateDashboard();
+  if(tab==='log')renderLog();
+  if(tab==='months')renderMonths();
+  if(tab==='insights')renderInsights();
+  if(tab==='taxes')renderTaxes();
+  if(tab==='route'){renderSavedRoutes();renderSavedAddressChips();if(stopCount===0){addStop();addStop();addStop();}}
+  if(tab==='notes'){loadNotes();renderFacilityNotes();renderContacts();syncSettingsInputs();}
+  if(tab==='contacts')renderContacts();
+}
+
+// PERIOD
+function setPeriod(p,el){currentPeriod=p;document.querySelectorAll('#dashboard .period-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('custom-range').classList.toggle('visible',p==='custom');if(p!=='custom')updateDashboard();}
+function applyCustomRange(){customFrom=document.getElementById('custom-from').value;customTo=document.getElementById('custom-to').value;if(customFrom&&customTo)updateDashboard();}
+function setLogPeriod(p,el){logPeriod=p;document.querySelectorAll('#log .period-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('log-custom-range').classList.toggle('visible',p==='custom');if(p!=='custom')renderLog();}
+function applyLogCustomRange(){logCustomFrom=document.getElementById('log-custom-from').value;logCustomTo=document.getElementById('log-custom-to').value;if(logCustomFrom&&logCustomTo)renderLog();}
+
+function getDateRange(period,from,to){
+  const now=new Date();
+  const sot=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const sow=new Date(now);sow.setDate(now.getDate()-now.getDay());sow.setHours(0,0,0,0);
+  const som=new Date(now.getFullYear(),now.getMonth(),1);
+  if(period==='today')return[sot,new Date(sot.getTime()+86399999)];
+  if(period==='week')return[sow,now];
+  if(period==='month')return[som,now];
+  if(period==='custom'&&from&&to)return[new Date(from+'T00:00:00'),new Date(to+'T23:59:59')];
+  return[null,null];
+}
+function filterEntries(list,period,from,to){
+  const[start,end]=getDateRange(period,from,to);
+  if(!start)return list;
+  return list.filter(e=>{const d=new Date(e.date+'T00:00:00');return d>=start&&d<=end;});
+}
+
+// FIELDS
+function toggleFields(){
+  const t=document.getElementById('entry-type').value;
+  document.getElementById('route-fields').style.display=t==='income-route'?'block':'none';
+  document.getElementById('stat-fields').style.display=t==='income-stat'?'block':'none';
+  document.getElementById('payment-fields').style.display=t==='payment-received'?'block':'none';
+}
+
+// ADD ENTRY
+function addEntry(){
+  const type=document.getElementById('entry-type').value;
+  const date=document.getElementById('entry-date').value;
+  const amount=parseFloat(document.getElementById('entry-amount').value);
+  const notes=document.getElementById('entry-notes').value;
+  if(!date||!amount||isNaN(amount)){alert('Please fill in date and amount');return;}
+  const entry={id:Date.now(),type,date,amount,notes};
+  if(type==='income-route'){
+    entry.route=document.getElementById('entry-route').value;
+    entry.pickup=document.getElementById('entry-pickup').value;
+    entry.stops=document.getElementById('entry-stops').value;
+    entry.miles=parseFloat(document.getElementById('entry-miles').value)||0;
+    entry.start=document.getElementById('entry-start').value;
+    entry.end=document.getElementById('entry-end').value;
+    entry.paymentStatus=document.getElementById('payment-status').value;
+  }
+  if(type==='income-stat'){
+    entry.pickup=document.getElementById('stat-pickup').value;
+    entry.delivery=document.getElementById('stat-delivery').value;
+    entry.miles=parseFloat(document.getElementById('stat-miles').value)||0;
+    entry.start=document.getElementById('stat-start').value;
+    entry.end=document.getElementById('stat-end').value;
+    entry.paymentStatus=document.getElementById('stat-payment-status').value;
+  }
+  if(type==='payment-received')entry.paymentNote=document.getElementById('payment-note').value;
+  entries.unshift(entry);
+  save();
+  ['entry-amount','entry-notes','entry-route','entry-pickup','entry-stops','entry-miles','entry-start','entry-end','stat-pickup','stat-delivery','stat-miles','stat-start','stat-end','payment-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  showToast('✓ '+(typeLabels[type]||type)+' logged — $'+amount.toFixed(2));
+  updateDashboard();
+}
+
+function deleteEntry(id){if(!confirm('Delete this entry?'))return;entries=entries.filter(e=>e.id!==id);save();renderLog();updateDashboard();}
+function markPaid(id){const e=entries.find(x=>x.id===id);if(e){e.paymentStatus='paid';save();renderLog();updateDashboard();}}
+function openEdit(id){const e=entries.find(x=>x.id===id);if(!e)return;editingId=id;document.getElementById('edit-amount').value=e.amount;document.getElementById('edit-date').value=e.date;document.getElementById('edit-notes').value=e.notes||'';document.getElementById('edit-modal').classList.add('open');}
+function saveEdit(){const e=entries.find(x=>x.id===editingId);if(!e)return;e.amount=parseFloat(document.getElementById('edit-amount').value)||e.amount;e.date=document.getElementById('edit-date').value||e.date;e.notes=document.getElementById('edit-notes').value;save();closeModal('edit-modal');renderLog();updateDashboard();}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2e7d32;color:white;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;transition:opacity 0.4s;max-width:90%;text-align:center;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},3000);
+}
+
+// GOALS
+function saveGoal(type){
+  if(type==='month'){const v=parseFloat(document.getElementById('goal-input').value);if(!v||isNaN(v))return;monthlyGoal=v;localStorage.setItem('zat_goal_month',v);document.getElementById('goal-input').value='';}
+  else{const v=parseFloat(document.getElementById('weekly-goal-input').value);if(!v||isNaN(v))return;weeklyGoal=v;localStorage.setItem('zat_goal_week',v);document.getElementById('weekly-goal-input').value='';}
+  updateDashboard();
+}
+function goalBar(income,goal,barId,labelId,pctId,remainId,displayId){
+  if(goal<=0)return;
+  const pct=Math.min(100,Math.round((income/goal)*100));
+  document.getElementById(displayId).style.display='block';
+  document.getElementById(labelId).textContent='$'+Math.round(income)+' of $'+Math.round(goal)+' gross';
+  document.getElementById(pctId).textContent=pct+'%';
+  document.getElementById(pctId).style.color=pct>=100?'var(--green)':pct>=60?'#f9a825':'var(--red)';
+  const bar=document.getElementById(barId);
+  bar.style.width=pct+'%';
+  bar.className='goal-bar '+(pct>=100?'goal-green':pct>=60?'goal-yellow':'goal-red');
+  document.getElementById(remainId).textContent=pct>=100?'Goal reached!':'$'+Math.round(Math.max(0,goal-income))+' to go';
+}
+
+function calcStats(list){
+  const income=list.filter(e=>e.type&&e.type.startsWith('income')).reduce((s,e)=>s+e.amount,0);
+  const expenses=list.filter(e=>e.type&&e.type.startsWith('expense')).reduce((s,e)=>s+e.amount,0);
+  const statIncome=list.filter(e=>e.type==='income-stat').reduce((s,e)=>s+e.amount,0);
+  const regularIncome=list.filter(e=>e.type==='income-route').reduce((s,e)=>s+e.amount,0);
+  const miles=list.reduce((s,e)=>s+(e.miles||0),0);
+  const mileageDeduction=miles*mileageRate;
+  const taxReserve=income*taxRate;
+  const net=income-expenses-taxReserve;
+  return{income,expenses,statIncome,regularIncome,miles,mileageDeduction,taxReserve,net,routes:list.filter(e=>e.type==='income-route').length,stats:list.filter(e=>e.type==='income-stat').length};
+}
+
+function updateDashboard(){
+  const filtered=filterEntries(entries,currentPeriod,customFrom,customTo);
+  const s=calcStats(filtered);
+  const labels={today:'Today',week:'This week',month:'This month',all:'All time',custom:customFrom&&customTo?customFrom+' → '+customTo:'Custom'};
+  document.getElementById('dash-period-label').textContent=(labels[currentPeriod]||'All time')+' — net after tax reserve';
+  document.getElementById('total-income').textContent='$'+Math.round(s.income);
+  document.getElementById('total-expenses').textContent='$'+Math.round(s.expenses);
+  document.getElementById('tax-reserve').textContent='$'+Math.round(s.taxReserve);
+  document.getElementById('stat-total').textContent='$'+Math.round(s.statIncome);
+  document.getElementById('stat-total-2').textContent='$'+Math.round(s.statIncome);
+  document.getElementById('regular-total').textContent='$'+Math.round(s.regularIncome);
+  document.getElementById('total-miles').textContent=Math.round(s.miles)+' mi';
+  document.getElementById('mileage-deduction').textContent='$'+Math.round(s.mileageDeduction);
+  document.getElementById('mileage-rate-label').textContent='Mileage deduction ('+Math.round(mileageRate*100)+'¢/mi)';
+  document.getElementById('route-count').textContent=s.routes+s.stats;
+  document.getElementById('net-value').textContent='$'+s.net.toFixed(2);
+  const mi=calcStats(filterEntries(entries,'month',null,null)).income;
+  const wi=calcStats(filterEntries(entries,'week',null,null)).income;
+  goalBar(mi,monthlyGoal,'monthly-goal-bar','monthly-goal-label','monthly-goal-pct','monthly-goal-remaining','monthly-goal-display');
+  goalBar(wi,weeklyGoal,'weekly-goal-bar','weekly-goal-label','weekly-goal-pct','weekly-goal-remaining','weekly-goal-display');
+  renderQuickLog();renderPaymentsOwed();renderSettlementCenter();renderRouteProfitability();updateUnpaidBadge();
+}
+
+function renderQuickLog(){
+  const el=document.getElementById('quick-log-list');
+  if(!savedRoutes.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;">No saved routes yet. Save a route in the Route tab.</div>';return;}
+  el.innerHTML=savedRoutes.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--primary-light);border-radius:8px;margin-bottom:6px;"><div><div style="font-size:14px;font-weight:600;color:var(--primary);">${r.name}</div><div style="font-size:11px;color:var(--sub);">${r.stops?r.stops.length:0} stops · ${r.miles||0} mi</div></div><button class="btn-sm" onclick="quickLogRoute(${i})">Log${r.defaultPay?' $'+r.defaultPay:''}</button></div>`).join('');
+}
+
+function quickLogRoute(idx){
+  const r=savedRoutes[idx];
+  const pay=prompt('Enter pay for '+r.name+':',(r.defaultPay||'66'));
+  if(!pay)return;
+  entries.unshift({id:Date.now(),type:'income-route',date:new Date().toISOString().split('T')[0],amount:parseFloat(pay),route:r.name,miles:r.miles||0,notes:'Quick logged',paymentStatus:'unpaid'});
+  save();showToast('✓ '+r.name+' logged — $'+pay);updateDashboard();
+}
+
+function renderPaymentsOwed(){
+  const unpaid=entries.filter(e=>(e.type==='income-route'||e.type==='income-stat')&&e.paymentStatus==='unpaid');
+  const total=unpaid.reduce((s,e)=>s+e.amount,0);
+  const el=document.getElementById('payments-owed-list');
+  el.innerHTML=unpaid.length?`<div class="payment-owed"><div style="font-size:14px;font-weight:700;color:var(--blue);">$${total.toFixed(2)} total owed</div><div style="font-size:12px;color:var(--sub);margin-top:2px;">${unpaid.length} unpaid route${unpaid.length===1?'':'s'}</div></div>`:'<div style="color:var(--sub);font-size:13px;">No outstanding payments.</div>';
+}
+
+function updateUnpaidBadge(){
+  const count=entries.filter(e=>e.paymentStatus==='unpaid').length;
+  const btn=document.getElementById('nav-more');
+  if(!btn)return;
+  const ex=btn.querySelector('.unpaid-dot');if(ex)ex.remove();
+  if(count>0){const dot=document.createElement('div');dot.className='unpaid-dot';dot.style.cssText='position:absolute;top:6px;right:6px;background:var(--red);color:white;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 3px;';dot.textContent=count>9?'9+':count;btn.appendChild(dot);}
+}
+
+function renderSettlementCenter(){
+  const el=document.getElementById('settlement-center');if(!el)return;
+  const unpaid=entries.filter(e=>(e.type==='income-route'||e.type==='income-stat')&&e.paymentStatus==='unpaid');
+  const paid=entries.filter(e=>e.type==='payment-received');
+  if(!unpaid.length&&!paid.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;">No payment data yet.</div>';return;}
+  const totalUnpaid=unpaid.reduce((s,e)=>s+e.amount,0);
+  const totalReceived=paid.reduce((s,e)=>s+e.amount,0);
+  const variance=totalUnpaid-totalReceived;
+  el.innerHTML=`<div class="insight-row"><span class="insight-label">Total earned unpaid</span><span class="insight-value orange">$${totalUnpaid.toFixed(2)}</span></div><div class="insight-row"><span class="insight-label">Total payments received</span><span class="insight-value green">$${totalReceived.toFixed(2)}</span></div><div class="insight-row"><span class="insight-label">Still outstanding</span><span class="insight-value" style="color:${variance>0?'var(--orange)':'var(--green)'};"}>$${variance.toFixed(2)}</span></div>`;
+}
+
+function renderRouteProfitability(){
+  const el=document.getElementById('route-profitability-list');if(!el)return;
+  const routeEntries=entries.filter(e=>e.type==='income-route'||e.type==='income-stat');
+  if(!routeEntries.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;">No routes logged yet.</div>';return;}
+  const grouped={};
+  routeEntries.forEach(e=>{
+    const key=e.route||(e.pickup&&e.delivery?e.pickup+' → '+e.delivery:'Unnamed route');
+    grouped[key]=grouped[key]||{gross:0,miles:0,count:0,hours:0};
+    grouped[key].gross+=e.amount||0;grouped[key].miles+=e.miles||0;grouped[key].count+=1;
+    if(e.start&&e.end){const p1=e.start.split(':').map(Number),p2=e.end.split(':').map(Number);let h=(p2[0]+p2[1]/60)-(p1[0]+p1[1]/60);if(h<0)h+=24;grouped[key].hours+=h;}
+  });
+  const ranked=Object.entries(grouped).map(([name,d])=>{const mc=d.miles*mileageRate;const net=d.gross-mc;return{name,count:d.count,miles:d.miles,mileageCost:mc,net,hourly:d.hours>0?net/d.hours:null};}).sort((a,b)=>b.net-a.net).slice(0,5);
+  el.innerHTML=ranked.map(r=>`<div class="insight-row"><span class="insight-label">${r.name}<div style="font-size:11px;color:var(--sub);margin-top:2px;">${r.count} run${r.count===1?'':'s'} · ${Math.round(r.miles)} mi · $${r.mileageCost.toFixed(2)} est cost</div></span><span class="insight-value" style="text-align:right;color:var(--green);">$${r.net.toFixed(2)}<div style="font-size:11px;color:var(--sub);">${r.hourly?'$'+r.hourly.toFixed(2)+'/hr':'no time logged'}</div></span></div>`).join('');
+}
+
+// LOG
+function renderLog(){
+  const type=document.getElementById('filter-type').value;
+  let filtered=filterEntries(entries,logPeriod,logCustomFrom,logCustomTo);
+  if(type==='income')filtered=filtered.filter(e=>e.type&&e.type.startsWith('income'));
+  if(type==='expense')filtered=filtered.filter(e=>e.type&&e.type.startsWith('expense'));
+  if(type==='stat')filtered=filtered.filter(e=>e.type==='income-stat');
+  if(type==='unpaid')filtered=filtered.filter(e=>e.paymentStatus==='unpaid');
+  const list=document.getElementById('log-list');
+  const empty=document.getElementById('log-empty');
+  if(!filtered.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=filtered.map(e=>{
+    const isIncome=e.type&&e.type.startsWith('income');
+    const isStat=e.type==='income-stat';
+    const isPayment=e.type==='payment-received';
+    const cls=isPayment?'payment':isStat?'income-stat':(isIncome?'income-route':'expense');
+    let detail=e.date;
+    if(e.route)detail+=' · '+e.route;
+    if(e.pickup&&e.type==='income-route')detail+=' · From: '+e.pickup;
+    if(e.stops&&e.type==='income-route'){const lines=e.stops.split('\n').filter(Boolean);if(lines.length)detail+=' · '+lines.length+' stop'+(lines.length===1?'':'s');}
+    if(e.pickup&&e.type==='income-stat')detail+=' · '+e.pickup;
+    if(e.delivery&&e.type==='income-stat'){const dl=e.delivery.split('\n').filter(Boolean);detail+=' → '+(dl.length>1?dl.length+' stops':dl[0]||e.delivery);}
+    if(e.miles)detail+=' · '+e.miles+' mi';
+    if(e.start&&e.end)detail+=' · '+e.start+'–'+e.end;
+    if(e.paymentNote)detail+=' · '+e.paymentNote;
+    if(e.notes)detail+=' · '+e.notes;
+    const unpaidBadge=e.paymentStatus==='unpaid'?'<span class="unpaid-badge-inline">UNPAID</span>':'';
+    const markPaidBtn=e.paymentStatus==='unpaid'?`<button class="btn-edit" onclick="markPaid(${e.id})" style="color:var(--green);">Paid</button>`:'';
+    return`<div class="entry ${cls}"><div class="entry-top"><div><div class="entry-title">${typeLabels[e.type]||e.type}</div>${isStat?'<span class="stat-badge">STAT</span>':''}${unpaidBadge}</div><div style="display:flex;align-items:center;gap:6px;"><div class="entry-amount ${isIncome||isPayment?'green':'red'}">${isIncome||isPayment?'+':'-'}$${e.amount.toFixed(2)}</div>${markPaidBtn}<button class="btn-edit" onclick="openEdit(${e.id})">Edit</button><button class="delete-btn" onclick="deleteEntry(${e.id})">×</button></div></div><div class="entry-detail">${detail}</div></div>`;
+  }).join('');
+}
+
+function exportCSV(){
+  if(!entries.length){alert('No entries to export');return;}
+  const headers=['Date','Type','Amount','Route','Miles','Pickup','Delivery/Stops','Start','End','Payment Status','Notes'];
+  const rows=entries.map(e=>[e.date,typeLabels[e.type]||e.type,e.amount.toFixed(2),e.route||'',e.miles||'',e.pickup||'',e.delivery||e.stops||'',e.start||'',e.end||'',e.paymentStatus||'',e.notes||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='zatellite_export.csv';a.click();URL.revokeObjectURL(url);
+}
+
+// MONTHLY
+function renderMonths(){
+  const months={};
+  entries.forEach(e=>{
+    if(!e.type)return;
+    const d=new Date(e.date+'T00:00:00');
+    const key=d.toLocaleString('default',{month:'long',year:'numeric'});
+    const sk=d.getFullYear()+'-'+String(d.getMonth()).padStart(2,'0');
+    if(!months[key])months[key]={income:0,expenses:0,statIncome:0,miles:0,routes:0,stats:0,sortKey:sk};
+    if(e.type.startsWith('income'))months[key].income+=e.amount;
+    if(e.type.startsWith('expense'))months[key].expenses+=e.amount;
+    if(e.type==='income-stat')months[key].statIncome+=e.amount;
+    if(e.miles)months[key].miles+=e.miles;
+    if(e.type==='income-route')months[key].routes++;
+    if(e.type==='income-stat')months[key].stats++;
+  });
+  const keys=Object.keys(months).sort((a,b)=>months[b].sortKey.localeCompare(months[a].sortKey));
+  const ml=document.getElementById('monthly-list');
+  const me=document.getElementById('monthly-empty');
+  if(!keys.length){ml.innerHTML='';me.style.display='block';return;}
+  me.style.display='none';
+  ml.innerHTML=keys.map(k=>{
+    const m=months[k];const net=m.income-m.expenses;const tax=m.income*taxRate;const th=m.income-m.expenses-tax;
+    const gp=monthlyGoal>0?Math.min(100,Math.round((m.income/monthlyGoal)*100)):null;
+    const bc=gp===null?'':gp>=100?'goal-green':gp>=60?'goal-yellow':'goal-red';
+    return`<div class="month-card"><div class="month-name">${k}</div>${gp!==null?`<div class="goal-bar-bg" style="margin-bottom:8px;"><div class="goal-bar ${bc}" style="width:${gp}%"></div></div>`:''}<div class="month-row"><span style="color:var(--sub);">Gross income</span><span class="green" style="font-weight:700;">$${m.income.toFixed(2)}</span></div><div class="month-row"><span style="color:var(--sub);">Expenses</span><span class="red" style="font-weight:600;">$${m.expenses.toFixed(2)}</span></div><div class="month-row"><span style="color:var(--sub);">Net</span><span style="font-weight:600;">$${net.toFixed(2)}</span></div><div class="month-row"><span style="color:var(--sub);">Tax reserve</span><span class="red" style="font-weight:600;">$${tax.toFixed(2)}</span></div><div class="month-row"><span style="color:var(--sub);">Take home</span><span class="green" style="font-weight:700;">$${th.toFixed(2)}</span></div><div style="border-top:1px solid var(--border);margin:6px 0;"></div><div class="month-row"><span style="color:var(--sub);">Stat pay</span><span class="orange">$${m.statIncome.toFixed(2)}</span></div><div class="month-row"><span style="color:var(--sub);">Routes</span><span style="font-weight:600;">${m.routes} regular · ${m.stats} stat</span></div><div class="month-row"><span style="color:var(--sub);">Miles</span><span class="blue">${Math.round(m.miles)} mi</span></div></div>`;
+  }).join('');
+}
+
+// INSIGHTS
+function getWeekKey(d){const dt=new Date(d+'T00:00:00');const s=new Date(dt);s.setDate(dt.getDate()-dt.getDay());return s.toISOString().split('T')[0];}
+function renderInsights(){
+  const s=calcStats(entries);
+  const taxable=Math.max(0,s.income-s.expenses-s.mileageDeduction);
+  const taxOwed=taxable*taxRate;
+  document.getElementById('ins-gross').textContent='$'+s.income.toFixed(2);
+  document.getElementById('ins-expenses').textContent='$'+s.expenses.toFixed(2);
+  document.getElementById('ins-mileage').textContent='$'+s.mileageDeduction.toFixed(2);
+  document.getElementById('ins-taxable').textContent='$'+taxable.toFixed(2);
+  document.getElementById('ins-tax').textContent='$'+taxOwed.toFixed(2);
+  document.getElementById('ins-takehome').textContent='$'+(s.income-s.expenses-taxOwed).toFixed(2);
+  document.getElementById('ins-routes').textContent=s.routes;
+  document.getElementById('ins-stats').textContent=s.stats;
+  document.getElementById('ins-avg').textContent='$'+((s.routes+s.stats)>0?s.income/(s.routes+s.stats):0).toFixed(2);
+  document.getElementById('ins-miles').textContent=Math.round(s.miles)+' mi';
+  const weeks={},months2={},wc={};
+  entries.filter(e=>e.type&&e.type.startsWith('income')).forEach(e=>{const wk=getWeekKey(e.date);const mo=e.date.substring(0,7);weeks[wk]=(weeks[wk]||0)+e.amount;months2[mo]=(months2[mo]||0)+e.amount;wc[wk]=(wc[wk]||0)+1;});
+  const bwk=Object.keys(weeks).sort((a,b)=>weeks[b]-weeks[a])[0];
+  const bmo=Object.keys(months2).sort((a,b)=>months2[b]-months2[a])[0];
+  const bst=entries.filter(e=>e.type==='income-stat').sort((a,b)=>b.amount-a.amount)[0];
+  const mrwk=Object.keys(wc).sort((a,b)=>wc[b]-wc[a])[0];
+  document.getElementById('best-week').textContent=bwk?'$'+Math.round(weeks[bwk]):'$0';
+  document.getElementById('best-week-label').textContent=bwk?'week of '+bwk:'';
+  document.getElementById('best-month').textContent=bmo?'$'+Math.round(months2[bmo]):'$0';
+  document.getElementById('best-month-label').textContent=bmo||'';
+  document.getElementById('best-stat').textContent=bst?'$'+bst.amount.toFixed(2):'$0';
+  document.getElementById('most-routes').textContent=mrwk?wc[mrwk]:'0';
+  const rd=[...new Set(entries.filter(e=>e.type&&e.type.startsWith('income')).map(e=>e.date))].sort((a,b)=>b.localeCompare(a));
+  let streak=0;
+  if(rd.length){const today=new Date().toISOString().split('T')[0];let check=rd[0]===today?new Date(today+'T00:00:00'):null;if(check){streak=1;for(let i=1;i<rd.length;i++){const p=new Date(check);p.setDate(p.getDate()-1);if(rd[i]===p.toISOString().split('T')[0]){streak++;check=p;}else break;}}}
+  document.getElementById('streak-num').textContent=streak;
+}
+
+// TAXES
+function renderTaxes(){
+  const quarters=[{id:'q1',start:'2026-01-01',end:'2026-03-31'},{id:'q2',start:'2026-04-01',end:'2026-05-31'},{id:'q3',start:'2026-06-01',end:'2026-08-31'},{id:'q4',start:'2026-09-01',end:'2026-12-31'}];
+  quarters.forEach(q=>{const f=filterEntries(entries,'custom',q.start,q.end);const inc=f.filter(e=>e.type&&e.type.startsWith('income')).reduce((s,e)=>s+e.amount,0);document.getElementById(q.id+'-income').textContent='$'+inc.toFixed(2);document.getElementById(q.id+'-tax').textContent='$'+(inc*taxRate).toFixed(2);});
+}
+
+function saveBusinessSettings(){
+  const m=parseFloat(document.getElementById('setting-mileage-rate').value);
+  const t=parseFloat(document.getElementById('setting-tax-rate').value);
+  if(!isNaN(m)&&m>0){mileageRate=m;localStorage.setItem('zat_mileage_rate',m);}
+  if(!isNaN(t)&&t>=0){taxRate=t/100;localStorage.setItem('zatellite_taxrate',taxRate);}
+  syncSettingsInputs();updateDashboard();renderInsights();renderTaxes();
+  showToast('✓ Settings saved');
+}
+function syncSettingsInputs(){
+  const mi=document.getElementById('setting-mileage-rate');const ti=document.getElementById('setting-tax-rate');
+  if(mi)mi.value=Number(mileageRate).toFixed(2);
+  if(ti)ti.value=(taxRate*100).toFixed(0);
+}
+
+// ROUTE OPTIMIZER - ChatGPT's clean approach: let Google fully optimize
+function addStop(value){
+  stopCount++;
+  const container=document.getElementById('stops-container');
+  const div=document.createElement('div');
+  div.id='stop-row-'+stopCount;
+  div.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+  div.innerHTML='<div style="width:24px;height:24px;border-radius:50%;background:var(--primary);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+stopCount+'</div><input type="text" id="stop-'+stopCount+'" placeholder="Stop address" value="'+(value||'')+'" style="flex:1;"><button class="delete-btn" onclick="this.parentElement.remove()" style="font-size:18px;flex-shrink:0;">×</button>';
+  container.appendChild(div);
+}
+function clearRoute(){
+  document.getElementById('stops-container').innerHTML='';
+  ['origin','destination','route-name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('route-results').style.display='none';
+  stopCount=0;optimizedOrder=[];
+  addStop();addStop();addStop();
+}
+function getStops(){
+  const stops=[];
+  document.querySelectorAll('#stops-container input[type="text"]').forEach(input=>{if(input.value.trim())stops.push(input.value.trim());});
+  return stops;
+}
+function saveCurrentRoute(){
+  const name=document.getElementById('route-name').value.trim()||('Route '+(savedRoutes.length+1));
+  const origin=document.getElementById('origin').value.trim();
+  const destination=document.getElementById('destination').value.trim()||origin;
+  const stops=getStops();
+  if(!origin||!stops.length){alert('Please enter an origin and at least one stop');return;}
+  const pay=prompt('Default pay for this route? (e.g. 66)','');
+  const miles=prompt('Approximate miles?','');
+  savedRoutes.push({id:Date.now(),name,origin,destination,stops,defaultPay:pay||'',miles:parseFloat(miles)||0});
+  localStorage.setItem('zat_saved_routes',JSON.stringify(savedRoutes));
+  showToast('✓ '+name+' saved');renderSavedRoutes();
+}
+function loadSavedRoute(idx){
+  const r=savedRoutes[idx];
+  document.getElementById('origin').value=r.origin;
+  document.getElementById('destination').value=r.destination;
+  document.getElementById('route-name').value=r.name;
+  document.getElementById('stops-container').innerHTML='';
+  stopCount=0;
+  r.stops.forEach(s=>addStop(s));
+}
+function duplicateRoute(idx){
+  const r=JSON.parse(JSON.stringify(savedRoutes[idx]));
+  r.id=Date.now();r.name=r.name+' (copy)';
+  savedRoutes.push(r);localStorage.setItem('zat_saved_routes',JSON.stringify(savedRoutes));
+  renderSavedRoutes();showToast('✓ Route duplicated');
+}
+function deleteRoute(idx){
+  if(!confirm('Delete this saved route?'))return;
+  savedRoutes.splice(idx,1);localStorage.setItem('zat_saved_routes',JSON.stringify(savedRoutes));
+  renderSavedRoutes();
+}
+function renderSavedRoutes(){
+  const el=document.getElementById('saved-routes-list');
+  if(!savedRoutes.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;">No saved routes yet.</div>';return;}
+  el.innerHTML=savedRoutes.map((r,i)=>`<div class="saved-route-card"><div class="saved-route-name">${r.name}</div><div class="saved-route-detail">${r.stops.length} stops · ${r.defaultPay?'$'+r.defaultPay:'no pay set'} · ${r.miles||0} mi</div><div class="saved-route-actions"><button class="btn-sm" onclick="loadSavedRoute(${i})">Load</button><button class="btn-sm-outline" onclick="duplicateRoute(${i})">Duplicate</button><button class="btn-sm-outline" onclick="quickLogRoute(${i})" style="color:var(--green);">Quick log</button><button class="delete-btn" onclick="deleteRoute(${i})" style="font-size:16px;margin-left:4px;">×</button></div></div>`).join('');
+}
+function showSaveAddressModal(){document.getElementById('addr-modal').classList.add('open');}
+function saveAddress(){
+  const label=document.getElementById('addr-label').value.trim();
+  const value=document.getElementById('addr-value').value.trim();
+  if(!label||!value){alert('Please fill in both fields');return;}
+  savedAddresses.push({label,value});localStorage.setItem('zat_saved_addresses',JSON.stringify(savedAddresses));
+  document.getElementById('addr-label').value='';document.getElementById('addr-value').value='';
+  closeModal('addr-modal');renderSavedAddressChips();
+}
+function renderSavedAddressChips(){
+  const el=document.getElementById('saved-addr-chips');
+  if(!savedAddresses.length){el.innerHTML='<div style="color:var(--sub);font-size:12px;">No saved addresses yet.</div>';return;}
+  el.innerHTML=savedAddresses.map((a,i)=>`<div style="display:flex;align-items:center;gap:4px;"><button onclick="useAddress('${a.value.replace(/'/g,"\\'")}')" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;width:auto;margin:0;">${a.label}</button><button onclick="deleteAddress(${i})" style="background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;width:auto;margin:0;padding:2px;">×</button></div>`).join('');
+}
+function useAddress(value){
+  const origin=document.getElementById('origin');
+  if(!origin.value){origin.value=value;return;}
+  addStop(value);
+}
+function deleteAddress(idx){savedAddresses.splice(idx,1);localStorage.setItem('zat_saved_addresses',JSON.stringify(savedAddresses));renderSavedAddressChips();}
+
+function optimizeRoute(){
+  if(typeof google==='undefined'||!google.maps){alert('Google Maps is still loading. Please wait a moment and try again.');return;}
+  const origin=document.getElementById('origin').value.trim();
+  const destination=document.getElementById('destination').value.trim()||origin;
+  const stops=getStops();
+  if(!origin){alert('Please enter a starting point');return;}
+  if(!stops.length){alert('Please enter at least one stop');return;}
+  currentOrigin=origin;currentDest=destination;
+  document.getElementById('route-loading').style.display='block';
+  document.getElementById('route-results').style.display='none';
+  document.getElementById('optimize-btn').disabled=true;
+  const service=new google.maps.DirectionsService();
+  service.route({
+    origin:origin,destination:destination,
+    waypoints:stops.map(s=>({location:s,stopover:true})),
+    optimizeWaypoints:true,
+    travelMode:google.maps.TravelMode.DRIVING
+  },function(result,status){
+    document.getElementById('route-loading').style.display='none';
+    document.getElementById('optimize-btn').disabled=false;
+    if(status!=='OK'){
+      const errors={NOT_FOUND:'One or more addresses could not be found. Check spelling and include city/state.',ZERO_RESULTS:'No driving route found.',MAX_WAYPOINTS_EXCEEDED:'Too many stops added.',INVALID_REQUEST:'Check your start point and stops.',OVER_QUERY_LIMIT:'Request limit hit. Wait a minute and try again.',REQUEST_DENIED:'Google Maps denied the request. Check API key and billing.'};
+      alert(errors[status]||('Route error: '+status));return;
+    }
+    const route=result.routes&&result.routes[0];
+    if(!route){alert('No route results returned.');return;}
+    const legs=route.legs||[];
+    let totalDist=0,totalTime=0;
+    legs.forEach(leg=>{totalDist+=leg.distance?leg.distance.value:0;totalTime+=leg.duration?leg.duration.value:0;});
+    const totalMi=(totalDist/1609.34).toFixed(1);
+    const totalMin=Math.round(totalTime/60);
+    const hrs=Math.floor(totalMin/60),mins=totalMin%60;
+    const timeStr=hrs>0?hrs+'h '+mins+'m':mins+' min';
+    const wo=route.waypoint_order||[];
+    optimizedOrder=wo.length?wo.map(idx=>stops[idx]):stops.slice();
+    document.getElementById('route-summary-box').innerHTML=
+      '<div class="route-summary-row"><span style="color:var(--sub);font-size:13px;">Total distance</span><span style="font-weight:700;color:var(--primary);">'+totalMi+' miles</span></div>'+
+      '<div class="route-summary-row"><span style="color:var(--sub);font-size:13px;">Estimated drive time</span><span style="font-weight:700;color:var(--primary);">'+timeStr+'</span></div>'+
+      '<div class="route-summary-row"><span style="color:var(--sub);font-size:13px;">Total stops</span><span style="font-weight:700;color:var(--primary);">'+stops.length+'</span></div>'+
+      '<div class="route-summary-row"><span style="color:var(--sub);font-size:11px;font-style:italic;">Google optimized stop order. Use arrows to manually adjust.</span></div>';
+    renderOptimizedStops(origin,destination,optimizedOrder);
+    document.getElementById('route-results').style.display='block';
+  });
+}
+
+function renderOptimizedStops(origin,destination,stopsArr){
+  const container=document.getElementById('optimized-stops');container.innerHTML='';
+  const od=document.createElement('div');od.className='optimized-stop';
+  od.innerHTML='<div class="opt-num" style="background:#2e7d32;">S</div><div><div class="opt-address">'+origin+'</div><div style="font-size:11px;color:var(--sub);margin-top:3px;">Starting point</div></div>';
+  container.appendChild(od);
+  stopsArr.forEach(function(addr,i){
+    const div=document.createElement('div');div.className='optimized-stop';div.style.alignItems='flex-start';
+    div.innerHTML='<div class="opt-num">'+(i+1)+'</div><div style="flex:1;"><div class="opt-address">'+addr+'</div><a class="map-btn" href="https://maps.google.com/?q='+encodeURIComponent(addr)+'" target="_blank">Open in Maps</a></div><div style="display:flex;flex-direction:column;gap:4px;margin-left:8px;"><button onclick="moveStop('+i+',-1)" style="background:var(--primary-light);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:14px;cursor:pointer;color:var(--primary);width:auto;margin:0;">↑</button><button onclick="moveStop('+i+',1)" style="background:var(--primary-light);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:14px;cursor:pointer;color:var(--primary);width:auto;margin:0;">↓</button></div>';
+    container.appendChild(div);
+  });
+  const rd=document.createElement('div');rd.className='optimized-stop';
+  rd.innerHTML='<div class="opt-num" style="background:#c62828;">R</div><div><div class="opt-address">'+destination+'</div><div style="font-size:11px;color:var(--sub);margin-top:3px;">Return point</div></div>';
+  container.appendChild(rd);
+}
+function moveStop(index,direction){
+  const ni=index+direction;if(ni<0||ni>=optimizedOrder.length)return;
+  const temp=optimizedOrder[index];optimizedOrder[index]=optimizedOrder[ni];optimizedOrder[ni]=temp;
+  renderOptimizedStops(currentOrigin,currentDest,optimizedOrder);
+}
+function openInMaps(){
+  if(!currentOrigin||!optimizedOrder.length)return;
+  const url='https://www.google.com/maps/dir/'+encodeURIComponent(currentOrigin)+'/'+optimizedOrder.map(s=>encodeURIComponent(s)).join('/')+'/'+encodeURIComponent(currentDest||currentOrigin);
+  window.open(url,'_blank');
+}
+function logThisRoute(){
+  const name=document.getElementById('route-name').value.trim()||'Route';
+  const pay=prompt('Enter pay for this route:','');
+  if(!pay)return;
+  entries.unshift({id:Date.now(),type:'income-route',date:new Date().toISOString().split('T')[0],amount:parseFloat(pay),route:name,notes:'Logged from route optimizer',paymentStatus:'unpaid'});
+  save();showToast('✓ Route logged — $'+pay);updateDashboard();
+}
+function exportRoutesOnly(){
+  const blob=new Blob([JSON.stringify({savedRoutes,savedAddresses,facilityNotes,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='zatellite-routes.json';a.click();URL.revokeObjectURL(url);
+}
+function importRoutesOnly(event){
+  const file=event.target.files&&event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{const d=JSON.parse(e.target.result);
+      if(Array.isArray(d.savedRoutes))savedRoutes=d.savedRoutes;
+      if(Array.isArray(d.savedAddresses))savedAddresses=d.savedAddresses;
+      if(Array.isArray(d.facilityNotes))facilityNotes=d.facilityNotes;
+      localStorage.setItem('zat_saved_routes',JSON.stringify(savedRoutes));
+      localStorage.setItem('zat_saved_addresses',JSON.stringify(savedAddresses));
+      localStorage.setItem('zat_facility_notes',JSON.stringify(facilityNotes));
+      renderSavedRoutes();renderSavedAddressChips();renderFacilityNotes();
+      showToast('✓ Routes imported');
+    }catch(e){alert('Could not import route file.');}
+    event.target.value='';
+  };reader.readAsText(file);
+}
+
+// NOTES
+function loadNotes(){
+  document.getElementById('business-notes').value=localStorage.getItem('zat_business_notes')||'';
+  document.getElementById('general-notes').value=localStorage.getItem('zat_general_notes')||'';
+}
+function saveBusinessNotes(){localStorage.setItem('zat_business_notes',document.getElementById('business-notes').value);}
+function saveGeneralNotes(){localStorage.setItem('zat_general_notes',document.getElementById('general-notes').value);}
+function showFacilityNoteModal(){document.getElementById('facility-modal').classList.add('open');}
+function saveFacilityNote(){
+  const name=document.getElementById('facility-name').value.trim();
+  const text=document.getElementById('facility-note-text').value.trim();
+  if(!name||!text){alert('Please fill in both fields');return;}
+  facilityNotes.push({id:Date.now(),name,text});localStorage.setItem('zat_facility_notes',JSON.stringify(facilityNotes));
+  document.getElementById('facility-name').value='';document.getElementById('facility-note-text').value='';
+  closeModal('facility-modal');renderFacilityNotes();
+}
+function deleteFacilityNote(id){facilityNotes=facilityNotes.filter(n=>n.id!==id);localStorage.setItem('zat_facility_notes',JSON.stringify(facilityNotes));renderFacilityNotes();}
+function renderFacilityNotes(){
+  const el=document.getElementById('facility-notes-list');
+  if(!facilityNotes.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;">No facility notes yet.</div>';return;}
+  el.innerHTML=facilityNotes.map(n=>`<div class="facility-note"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div class="facility-note-name">${n.name}</div><button class="delete-btn" onclick="deleteFacilityNote(${n.id})" style="font-size:16px;">×</button></div><div class="facility-note-text">${n.text}</div></div>`).join('');
+}
+
+// CONTACTS
+function renderContacts(){
+  const list=document.getElementById('contacts-list');if(!list)return;
+  if(!appContacts.length){list.innerHTML='<div class="empty-state" style="padding:20px 0;">No contacts yet. Add them in Notes & Settings.</div>';return;}
+  list.innerHTML=appContacts.map((c,i)=>`<a class="contact-btn" href="tel:${c.phone||''}"><div><div class="contact-name">${c.name||'Unnamed'}</div><div class="contact-role">${c.role||''}${c.label?' · '+c.label:''}</div></div><div style="display:flex;align-items:center;gap:8px;"><button class="btn-edit" onclick="event.preventDefault();deleteContact(${i})">Delete</button><div class="call-icon">📞</div></div></a>`).join('');
+  const editor=document.getElementById('contact-editor-list');
+  if(editor)editor.innerHTML=appContacts.map((c,i)=>`<div style="border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div style="font-weight:700;color:var(--text);">${c.name}</div><div style="color:var(--sub);margin-top:2px;">${c.role||''}</div><div style="color:var(--sub);margin-top:2px;">${c.phone||''}</div></div><button class="btn-edit" onclick="deleteContact(${i})">Delete</button></div>`).join('');
+}
+function addContact(){
+  const name=document.getElementById('contact-name-input').value.trim();
+  const role=document.getElementById('contact-role-input').value.trim();
+  const phone=document.getElementById('contact-phone-input').value.trim();
+  const label=document.getElementById('contact-label-input').value.trim();
+  if(!name||!phone){alert('Name and phone required');return;}
+  appContacts.push({name,role,phone,label});localStorage.setItem('zat_contacts',JSON.stringify(appContacts));
+  ['contact-name-input','contact-role-input','contact-phone-input','contact-label-input'].forEach(id=>{document.getElementById(id).value='';});
+  renderContacts();showToast('✓ '+name+' added');
+}
+function deleteContact(i){appContacts.splice(i,1);localStorage.setItem('zat_contacts',JSON.stringify(appContacts));renderContacts();}
+
+// BRAND
+function applyBrandSettings(){
+  const nameEl=document.getElementById('brand-name');const subEl=document.getElementById('brand-subtitle');const logoEl=document.getElementById('brand-logo');
+  if(nameEl)nameEl.textContent=brandSettings.name||'Zatellite Logistics';
+  if(subEl)subEl.textContent=brandSettings.subtitle||'Income, Expense & Route Tracker';
+  if(logoEl){if(brandSettings.logo){logoEl.src=brandSettings.logo;logoEl.style.display='block';}else{logoEl.style.display='none';logoEl.removeAttribute('src');}}
+  const ni=document.getElementById('setting-app-name');const si=document.getElementById('setting-app-subtitle');
+  if(ni)ni.value=brandSettings.name||'';if(si)si.value=brandSettings.subtitle||'';
+}
+function saveBrandSettings(){
+  brandSettings.name=document.getElementById('setting-app-name').value.trim()||'Zatellite Logistics';
+  brandSettings.subtitle=document.getElementById('setting-app-subtitle').value.trim()||'Income, Expense & Route Tracker';
+  localStorage.setItem('zat_brand_settings',JSON.stringify(brandSettings));
+  applyBrandSettings();showToast('✓ Brand saved');
+}
+function handleLogoUpload(event){
+  const file=event.target.files&&event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{brandSettings.logo=reader.result;localStorage.setItem('zat_brand_settings',JSON.stringify(brandSettings));applyBrandSettings();};
+  reader.readAsDataURL(file);
+}
+function clearLogo(){brandSettings.logo='';localStorage.setItem('zat_brand_settings',JSON.stringify(brandSettings));applyBrandSettings();}
+
+// PIN
+function savePin(){const pin=document.getElementById('setting-pin').value.trim();if(pin)localStorage.setItem('zat_pin',pin);showToast('✓ PIN saved');}
+function clearPin(){localStorage.removeItem('zat_pin');document.getElementById('setting-pin').value='';showToast('✓ PIN removed');}
+function checkPinLock(){const pin=localStorage.getItem('zat_pin');if(!pin)return;document.getElementById('pin-modal').classList.add('open');}
+function unlockApp(){const pin=localStorage.getItem('zat_pin');if(!pin){closeModal('pin-modal');return;}const entered=document.getElementById('pin-entry').value.trim();if(entered===pin){closeModal('pin-modal');document.getElementById('pin-entry').value='';}else{alert('Incorrect PIN');}}
+
+// THEME
+const defaultTheme={primary:'#1a237e',primaryLight:'#e8eaf6',green:'#2e7d32',orange:'#e65100',red:'#c62828',blue:'#1565c0'};
+const themePresets={navy:{primary:'#1a237e',primaryLight:'#e8eaf6',green:'#2e7d32',orange:'#e65100',red:'#c62828',blue:'#1565c0'},emerald:{primary:'#146c43',primaryLight:'#dff5e8',green:'#1f8f55',orange:'#c77700',red:'#b3261e',blue:'#0b57d0'},plum:{primary:'#6a1b9a',primaryLight:'#f3e5f5',green:'#2e7d32',orange:'#ef6c00',red:'#c62828',blue:'#3949ab'},sunset:{primary:'#c75b12',primaryLight:'#fff0e6',green:'#2e7d32',orange:'#ef6c00',red:'#b3261e',blue:'#00639b'}};
+function applyTheme(t){
+  const m={...defaultTheme,...(t||{})};
+  document.documentElement.style.setProperty('--primary',m.primary);
+  document.documentElement.style.setProperty('--primary-light',m.primaryLight);
+  document.documentElement.style.setProperty('--green',m.green);
+  document.documentElement.style.setProperty('--orange',m.orange);
+  document.documentElement.style.setProperty('--red',m.red);
+  document.documentElement.style.setProperty('--blue',m.blue);
+  const cp={primary:m.primary,'primary-light':m.primaryLight,green:m.green,orange:m.orange,red:m.red,blue:m.blue};
+  Object.entries({'theme-primary':m.primary,'theme-primary-light':m.primaryLight,'theme-green':m.green,'theme-orange':m.orange,'theme-red':m.red,'theme-blue':m.blue}).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
+}
+function applyThemePreset(name){const t=themePresets[name]||defaultTheme;applyTheme(t);localStorage.setItem('zat_theme_colors',JSON.stringify(t));localStorage.setItem('zat_theme_preset',name);document.querySelectorAll('.theme-chip[id^="theme-preset-"]').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('theme-preset-'+name);if(btn)btn.classList.add('active');}
+function saveCustomTheme(){const t={primary:document.getElementById('theme-primary').value,primaryLight:document.getElementById('theme-primary-light').value,green:document.getElementById('theme-green').value,orange:document.getElementById('theme-orange').value,red:document.getElementById('theme-red').value,blue:document.getElementById('theme-blue').value};applyTheme(t);localStorage.setItem('zat_theme_colors',JSON.stringify(t));localStorage.setItem('zat_theme_preset','custom');}
+function resetThemeColors(){localStorage.removeItem('zat_theme_colors');localStorage.setItem('zat_theme_preset','navy');applyTheme(defaultTheme);}
+function initTheme(){let t=null;try{t=JSON.parse(localStorage.getItem('zat_theme_colors')||'null');}catch(e){}const preset=localStorage.getItem('zat_theme_preset')||'navy';if(t)applyTheme(t);else applyTheme(themePresets[preset]||defaultTheme);if(preset!=='custom'){const btn=document.getElementById('theme-preset-'+preset);if(btn)btn.classList.add('active');}}
+
+// DARK MODE
+function applyDarkMode(){
+  if(darkMode){
+    document.documentElement.style.setProperty('--bg','#121212');document.documentElement.style.setProperty('--card','#1e1e1e');
+    document.documentElement.style.setProperty('--border','#333');document.documentElement.style.setProperty('--text','#eee');
+    document.documentElement.style.setProperty('--sub','#aaa');document.documentElement.style.setProperty('--input-bg','#2a2a2a');
+    const b=document.getElementById('dark-btn');if(b)b.textContent='☀️';
+  }else{
+    document.documentElement.style.setProperty('--bg','#f0f2f5');document.documentElement.style.setProperty('--card','#fff');
+    document.documentElement.style.setProperty('--border','#e8e8e8');document.documentElement.style.setProperty('--text','#333');
+    document.documentElement.style.setProperty('--sub','#888');document.documentElement.style.setProperty('--input-bg','#fafafa');
+    const b=document.getElementById('dark-btn');if(b)b.textContent='🌙';
+  }
+}
+function toggleDarkMode(){darkMode=!darkMode;localStorage.setItem('zat_dark',darkMode);applyDarkMode();}
+
+// FUEL CALCULATOR
+function calcFuel(){
+  const miles=parseFloat(document.getElementById('fuel-miles').value);
+  const price=parseFloat(document.getElementById('fuel-price').value);
+  const mpg=parseFloat(document.getElementById('fuel-mpg').value);
+  const pay=parseFloat(document.getElementById('fuel-pay').value);
+  if(!miles||!price||!mpg){document.getElementById('fuel-result').style.display='none';return;}
+  const gallons=miles/mpg;const gasCost=gallons*price;const net=(pay||0)-gasCost;
+  const estHours=miles/40;const hourly=pay?(net/estHours):null;
+  document.getElementById('fuel-result').style.display='block';
+  document.getElementById('fuel-gallons').textContent=gallons.toFixed(2)+' gal';
+  document.getElementById('fuel-cost').textContent='-$'+gasCost.toFixed(2);
+  document.getElementById('fuel-net').textContent=pay?'$'+net.toFixed(2):'Enter pay above';
+  document.getElementById('fuel-net').style.color=net>=0?'var(--green)':'var(--red)';
+  document.getElementById('fuel-hourly').textContent=hourly?'~$'+hourly.toFixed(2)+'/hr':'--';
+  localStorage.setItem('zat_mpg',mpg);localStorage.setItem('zat_gas_price',price);
+}
+
+// BACKUP
+function exportBackup(){
+  const payload={entries,monthlyGoal,weeklyGoal,taxRate,mileageRate,savedRoutes,savedAddresses,facilityNotes,appContacts,brandSettings,businessNotes:localStorage.getItem('zat_business_notes')||'',generalNotes:localStorage.getItem('zat_general_notes')||'',themeColors:localStorage.getItem('zat_theme_colors')||'',themePreset:localStorage.getItem('zat_theme_preset')||'navy',exportedAt:new Date().toISOString(),app:'Zatellite Logistics'};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='zatellite-backup.json';a.click();URL.revokeObjectURL(url);
+}
+function importBackup(event){
+  const file=event.target.files&&event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const d=JSON.parse(e.target.result);
+      entries=Array.isArray(d.entries)?d.entries:[];
+      monthlyGoal=parseFloat(d.monthlyGoal||0);weeklyGoal=parseFloat(d.weeklyGoal||0);
+      taxRate=parseFloat(d.taxRate||0.28);mileageRate=parseFloat(d.mileageRate||0.67);
+      savedRoutes=Array.isArray(d.savedRoutes)?d.savedRoutes:[];
+      savedAddresses=Array.isArray(d.savedAddresses)?d.savedAddresses:[];
+      facilityNotes=Array.isArray(d.facilityNotes)?d.facilityNotes:[];
+      if(Array.isArray(d.appContacts))appContacts=d.appContacts;
+      if(d.brandSettings)brandSettings=d.brandSettings;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));
+      localStorage.setItem('zat_goal_month',monthlyGoal);localStorage.setItem('zat_goal_week',weeklyGoal);
+      localStorage.setItem('zatellite_taxrate',taxRate);localStorage.setItem('zat_mileage_rate',mileageRate);
+      localStorage.setItem('zat_saved_routes',JSON.stringify(savedRoutes));
+      localStorage.setItem('zat_saved_addresses',JSON.stringify(savedAddresses));
+      localStorage.setItem('zat_facility_notes',JSON.stringify(facilityNotes));
+      localStorage.setItem('zat_contacts',JSON.stringify(appContacts));
+      localStorage.setItem('zat_brand_settings',JSON.stringify(brandSettings));
+      if(d.businessNotes)localStorage.setItem('zat_business_notes',d.businessNotes);
+      if(d.generalNotes)localStorage.setItem('zat_general_notes',d.generalNotes);
+      if(d.themeColors)localStorage.setItem('zat_theme_colors',d.themeColors);
+      if(d.themePreset)localStorage.setItem('zat_theme_preset',d.themePreset);
+      initTheme();applyBrandSettings();renderContacts();updateDashboard();
+      showToast('✓ Backup restored successfully');
+    }catch(err){alert('Could not import that file. Make sure it is a valid Zatellite backup.');}
+    event.target.value='';
+  };reader.readAsText(file);
+}
+
+// INIT
+document.getElementById('entry-date').value=new Date().toISOString().split('T')[0];
+const savedMpg=localStorage.getItem('zat_mpg');const savedGasPrice=localStorage.getItem('zat_gas_price');
+if(savedMpg)document.getElementById('fuel-mpg').value=savedMpg;
+if(savedGasPrice)document.getElementById('fuel-price').value=savedGasPrice;
+if(monthlyGoal>0)document.getElementById('goal-input').placeholder='Current: $'+monthlyGoal;
+if(weeklyGoal>0)document.getElementById('weekly-goal-input').placeholder='Current: $'+weeklyGoal;
+initTheme();applyDarkMode();applyBrandSettings();renderContacts();syncSettingsInputs();checkPinLock();
+updateDashboard();
+</script>
+</body>
+</html>
